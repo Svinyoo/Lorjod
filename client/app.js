@@ -2,6 +2,8 @@ const form = document.querySelector('#task-form');
 const titleInput = document.querySelector('#task-title');
 const list = document.querySelector('#task-list');
 const status = document.querySelector('#status');
+const logoutButton = document.querySelector('#logout');
+const welcome = document.querySelector('#welcome');
 
 const setStatus = (message = '') => { status.textContent = message; };
 
@@ -54,4 +56,17 @@ form.addEventListener('submit', async (event) => {
     titleInput.value = ''; titleInput.focus(); setStatus(`เพิ่ม “${task.title}” แล้ว`); await loadTasks();
   } catch (error) { setStatus(error.message); }
 });
-loadTasks();
+logoutButton.addEventListener('click', async () => {
+  await request('/api/auth/logout', { method: 'POST' });
+  window.location.assign('/login.html');
+});
+
+async function initialize() {
+  try {
+    const { user } = await request('/api/auth/me');
+    if (!user) return window.location.replace('/login.html');
+    welcome.textContent = `สวัสดี ${user.name}`;
+    await loadTasks();
+  } catch { window.location.replace('/login.html'); }
+}
+initialize();

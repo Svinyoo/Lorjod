@@ -10,7 +10,8 @@
     <main class="card">
       <p class="eyebrow">FULL-STACK DEMO</p>
       <h1>Task Board</h1>
-      <p class="subtitle">ตัวอย่างหน้าเว็บที่คุยกับ REST API</p>
+      <div class="topline"><p class="subtitle">รายการงานของคุณ</p><button id="logout" class="secondary" type="button">ออกจากระบบ</button></div>
+      <p id="welcome" class="welcome"></p>
       <form id="task-form">
         <label class="sr-only" for="task-title">ชื่องาน</label>
         <input id="task-title" name="title" placeholder="เพิ่มงานใหม่..." autocomplete="off" required />

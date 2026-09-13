@@ -5,6 +5,11 @@ body { min-height: 100vh; margin: 0; display: grid; place-items: center; padding
 .eyebrow { color: #6958e8; font-size: .75rem; font-weight: 800; letter-spacing: .1em; margin: 0; }
 h1 { margin: 8px 0 4px; }
 .subtitle { color: #667085; margin-top: 0; }
+.topline { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.topline .subtitle { margin-bottom: 0; }
+.welcome { color: #475467; font-size: .9rem; }
+.secondary { background: #eef1ff; color: #5141ce; padding: 7px 10px; }
+.secondary:hover { background: #dfe4ff; }
 form { display: flex; gap: 8px; margin: 24px 0 8px; }
 #task-title { min-width: 0; flex: 1; border: 1px solid #d0d5dd; border-radius: 9px; padding: 11px 12px; font: inherit; }
 button { border: 0; border-radius: 9px; background: #6958e8; color: white; cursor: pointer; font: inherit; font-weight: 700; padding: 10px 14px; }
@@ -18,3 +23,9 @@ li.done span { color: #98a2b3; text-decoration: line-through; }
 .delete:hover { background: #ffe0e0; }
 .empty { color: #667085; justify-content: center; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+.auth-card { width: min(100%, 440px); }
+.auth-form { display: grid; gap: 14px; }
+.auth-form label { display: grid; gap: 6px; color: #344054; font-size: .92rem; font-weight: 700; }
+.auth-form input { width: 100%; border: 1px solid #d0d5dd; border-radius: 9px; padding: 11px 12px; font: inherit; }
+.auth-form button { margin-top: 8px; }
+.auth-link { color: #5141ce; font-weight: 700; }
