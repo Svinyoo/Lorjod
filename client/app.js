@@ -1,72 +1,29 @@
-const form = document.querySelector('#task-form');
-const titleInput = document.querySelector('#task-title');
-const list = document.querySelector('#task-list');
-const status = document.querySelector('#status');
-const logoutButton = document.querySelector('#logout');
-const welcome = document.querySelector('#welcome');
-
-const setStatus = (message = '') => { status.textContent = message; };
-
-async function request(url, options = {}) {
-  const response = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...options });
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.message || 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
-  }
-  return response.status === 204 ? null : response.json();
-}
-
-function render(tasks) {
-  list.replaceChildren();
-  if (!tasks.length) {
-    list.innerHTML = '<li class="empty">ยังไม่มีงาน ลองเพิ่มงานแรกของคุณ</li>';
-    return;
-  }
-  tasks.forEach((task) => {
-    const item = document.createElement('li');
-    item.className = task.done ? 'done' : '';
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox'; checkbox.checked = task.done;
-    checkbox.setAttribute('aria-label', `ทำ ${task.title} เสร็จแล้ว`);
-    checkbox.addEventListener('change', () => updateTask(task.id, { done: checkbox.checked }));
-    const label = document.createElement('span'); label.textContent = task.title;
-    const remove = document.createElement('button');
-    remove.type = 'button'; remove.className = 'delete'; remove.textContent = 'ลบ';
-    remove.addEventListener('click', () => deleteTask(task.id));
-    item.append(checkbox, label, remove); list.append(item);
-  });
-}
-
-async function loadTasks() {
-  try { setStatus('กำลังโหลด...'); render(await request('/api/tasks')); setStatus(); }
-  catch (error) { setStatus(error.message); }
-}
-async function updateTask(id, changes) {
-  try { await request(`/api/tasks/${id}`, { method: 'PATCH', body: JSON.stringify(changes) }); await loadTasks(); }
-  catch (error) { setStatus(error.message); await loadTasks(); }
-}
-async function deleteTask(id) {
-  try { await request(`/api/tasks/${id}`, { method: 'DELETE' }); await loadTasks(); }
-  catch (error) { setStatus(error.message); }
-}
-form.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  try {
-    const task = await request('/api/tasks', { method: 'POST', body: JSON.stringify({ title: titleInput.value }) });
-    titleInput.value = ''; titleInput.focus(); setStatus(`เพิ่ม “${task.title}” แล้ว`); await loadTasks();
-  } catch (error) { setStatus(error.message); }
-});
-logoutButton.addEventListener('click', async () => {
-  await request('/api/auth/logout', { method: 'POST' });
-  window.location.assign('/login.html');
-});
-
-async function initialize() {
-  try {
-    const { user } = await request('/api/auth/me');
-    if (!user) return window.location.replace('/login.html');
-    welcome.textContent = `สวัสดี ${user.name}`;
-    await loadTasks();
-  } catch { window.location.replace('/login.html'); }
-}
-initialize();
+const $ = (s) => document.querySelector(s);
+const state = { locations: [], location: null, vehicles: [], vehicle: null, quote: null, booking: null };
+const money = new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB', maximumFractionDigits: 0 });
+const formatDate = new Intl.DateTimeFormat('th-TH', { dateStyle: 'medium', timeStyle: 'short' });
+async function request(url, options = {}) { const r = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...options }); if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.message || 'เกิดข้อผิดพลาดในการเชื่อมต่อ'); } return r.status === 204 ? null : r.json(); }
+function message(text = '', error = false) { $('#status').textContent = text; $('#status').classList.toggle('error', error); }
+function esc(v = '') { const x = document.createElement('div'); x.textContent = v; return x.innerHTML; }
+function dateValue(date) { return new Date(date).toLocaleString('sv-SE').slice(0, 16); }
+function showStep(n) { document.querySelectorAll('.step-panel').forEach((p) => p.classList.toggle('active', +p.dataset.step === n)); document.querySelectorAll('.steps li').forEach((p, i) => p.classList.toggle('active', i < n)); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function renderLocations() { const el = $('#location-list'); el.replaceChildren(); if (!state.locations.length) return el.innerHTML = '<p class="empty">ไม่พบลานจอดที่ตรงกับการค้นหา</p>'; state.locations.forEach((p) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'location-card'; b.innerHTML = `<span class="place-icon">P</span><span class="place-main"><strong>${esc(p.name)}</strong><small>${esc(p.address)}</small><small class="landmark">⌖ ใกล้ ${esc(p.landmarks.join(' · '))}</small></span><span class="availability ${p.availableSpaces ? '' : 'full'}"><b>${p.availableSpaces}</b> ช่องว่าง<small>${money.format(p.hourlyRate)}/ชม.</small></span>`; b.onclick = () => { state.location = p; $('#selected-place').innerHTML = `<strong>${esc(p.name)}</strong><span>${esc(p.address)} · เหลือ ${p.availableSpaces} ช่อง</span>`; showStep(2); quote(); }; el.append(b); }); }
+async function locations(q = '') { try { state.locations = await request(`/api/parking-locations?query=${encodeURIComponent(q)}`); renderLocations(); } catch (e) { message(e.message, true); } }
+function renderVehicles() { const el = $('#vehicle-list'); el.replaceChildren(); state.vehicles.forEach((v) => { const l = document.createElement('label'); l.className = 'vehicle-option'; l.innerHTML = `<input type="radio" name="vehicle" ${state.vehicle?.id === v.id ? 'checked' : ''}><span><b>${esc(v.plateNumber)}</b><small>${esc(v.typeLabel)} · ${esc(v.description || '-')}</small></span>${v.isFavorite ? '<em>รถคันโปรด</em>' : ''}`; l.querySelector('input').onchange = () => { state.vehicle = v; quote(); }; el.append(l); }); }
+async function vehicles() { state.vehicles = await request('/api/vehicles'); state.vehicle = state.vehicles.find((v) => v.isFavorite) || state.vehicles[0] || null; renderVehicles(); }
+function payload() { const startAt = new Date(`${$('#start-date').value}T${$('#start-time').value}`), endAt = new Date(`${$('#start-date').value}T${$('#end-time').value}`); return { locationId: state.location?.id, vehicleType: state.vehicle?.type || $('#vehicle-type').value, startAt: startAt.toISOString(), endAt: endAt.toISOString() }; }
+async function quote() { if (!state.location || (!state.vehicle && $('#new-vehicle').classList.contains('hidden'))) return; try { state.quote = await request('/api/quotes', { method: 'POST', body: JSON.stringify(payload()) }); $('#quote-price').textContent = money.format(state.quote.total); $('#quote-detail').textContent = `${state.quote.durationHours} ชั่วโมง · เหลือ ${state.quote.availableSpaces} ช่อง · ${state.quote.rateDescription}`; } catch (e) { state.quote = null; $('#quote-price').textContent = '—'; $('#quote-detail').textContent = e.message; } }
+function renderSummary() { const q = state.quote; $('#booking-summary').innerHTML = `<dl><div><dt>สถานที่</dt><dd>${esc(state.location.name)}</dd></div><div><dt>เวลาเข้า</dt><dd>${formatDate.format(new Date(q.startAt))}</dd></div><div><dt>เวลาออก</dt><dd>${formatDate.format(new Date(q.endAt))}</dd></div><div><dt>รถ</dt><dd>${esc(state.vehicle.plateNumber)} · ${esc(state.vehicle.typeLabel)}</dd></div><div class="total"><dt>ยอดรวม</dt><dd>${money.format(q.total)}</dd></div></dl>`; }
+function updateTimer() { if (!state.booking) return; const m = Math.max(0, Math.ceil((new Date(state.booking.endAt) - Date.now()) / 60000)); $('#countdown').textContent = m ? `เหลือเวลาจอด ${Math.floor(m / 60)} ชม. ${m % 60} นาที · แจ้งเตือนก่อนหมดเวลา 15 นาที` : 'เวลาจอดสิ้นสุดแล้ว'; }
+function pass(b) { state.booking = b; $('#pass-location').textContent = `${b.location.name} · ช่อง ${b.spotLabel}`; $('#pass-code').textContent = b.passCode; $('#pass-time').textContent = `${formatDate.format(new Date(b.startAt))} – ${new Date(b.endAt).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}`; $('#qr-code').innerHTML = Array.from({ length: 169 }, (_, i) => `<i class="${(i * 7 + b.passCode.charCodeAt(i % b.passCode.length)) % 5 < 2 ? 'on' : ''}"></i>`).join(''); $('#navigate-link').href = `https://www.google.com/maps/search/?api=1&query=${b.location.latitude},${b.location.longitude}`; updateTimer(); showStep(4); }
+$('#location-search').oninput = (e) => locations(e.target.value);
+$('#nearby-button').onclick = () => navigator.geolocation?.getCurrentPosition(({ coords }) => locations(`near:${coords.latitude},${coords.longitude}`), () => message('ไม่สามารถอ่านตำแหน่งได้ กรุณาค้นหาด้วยชื่อสถานที่', true));
+$('#hours').onchange = () => { if ($('#hours').value) { const s = new Date(`${$('#start-date').value}T${$('#start-time').value}`); $('#end-time').value = dateValue(new Date(+s + +$('#hours').value * 3600000)).slice(11); } quote(); };
+['#start-date', '#start-time', '#end-time', '#vehicle-type'].forEach((s) => $(s).onchange = quote);
+$('#add-vehicle').onclick = () => { $('#new-vehicle').classList.toggle('hidden'); if (!$('#new-vehicle').classList.contains('hidden')) { state.vehicle = null; renderVehicles(); } quote(); };
+$('#details-form').onsubmit = async (e) => { e.preventDefault(); try { if (!state.vehicle) { const plateNumber = $('#plate-number').value.trim(); if (!plateNumber) throw new Error('กรุณาเลือกรถหรือระบุทะเบียนรถ'); const v = await request('/api/vehicles', { method: 'POST', body: JSON.stringify({ plateNumber, type: $('#vehicle-type').value, description: $('#vehicle-description').value.trim(), isFavorite: $('#favorite-vehicle').checked }) }); await vehicles(); state.vehicle = state.vehicles.find((x) => x.id === v.id); } await quote(); if (!state.quote) throw new Error('ไม่สามารถคำนวณราคาได้'); renderSummary(); showStep(3); } catch (x) { message(x.message, true); } };
+document.querySelectorAll('[data-back]').forEach((b) => b.onclick = () => showStep(+b.dataset.back));
+$('#confirm-booking').onclick = async () => { try { pass(await request('/api/bookings', { method: 'POST', body: JSON.stringify({ ...payload(), vehicleId: state.vehicle.id, paymentMethod: $('#payment-method').value }) })); message(); } catch (e) { message(e.message, true); } };
+$('#extend-button').onclick = async () => { try { pass(await request(`/api/bookings/${state.booking.id}/extend`, { method: 'PATCH', body: JSON.stringify({ hours: 1 }) })); message('ขยายเวลาจอด 1 ชั่วโมงแล้ว'); } catch (e) { message(e.message, true); } };
+$('#new-booking').onclick = () => { state.location = null; state.quote = null; showStep(1); }; $('#logout').onclick = async () => { await request('/api/auth/logout', { method: 'POST' }); location.assign('/login.html'); };
+async function init() { try { const { user } = await request('/api/auth/me'); if (!user) return location.replace('/login.html'); $('#welcome').textContent = `สวัสดี ${user.name}`; const s = new Date(); s.setMinutes(Math.ceil(s.getMinutes() / 15) * 15, 0, 0); s.setHours(s.getHours() + 1); $('#start-date').value = dateValue(s).slice(0, 10); $('#start-date').min = dateValue(new Date()).slice(0, 10); $('#start-time').value = dateValue(s).slice(11); $('#end-time').value = dateValue(new Date(+s + 7200000)).slice(11); await Promise.all([locations(), vehicles()]); setInterval(updateTimer, 60000); } catch { location.replace('/login.html'); } } init();
