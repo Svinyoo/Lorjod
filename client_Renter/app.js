@@ -137,6 +137,10 @@ function renderSummary() {
 }
 function updateTimer() {
   if (!state.booking) return;
+  if (['cancelled','completed'].includes(state.booking.status)) {
+    $("#countdown").textContent = state.booking.status === 'cancelled' ? 'การจองนี้ถูกยกเลิกแล้ว' : 'การจองนี้สิ้นสุดแล้ว';
+    return;
+  }
   const m = Math.max(
     0,
     Math.ceil((new Date(state.booking.endAt) - Date.now()) / 60000),
@@ -147,6 +151,10 @@ function updateTimer() {
 }
 function pass(b) {
   state.booking = b;
+  const usable = ['confirmed','active'].includes(b.status);
+  $("#extend-button").disabled = !usable;
+  $("#qr-code").hidden = !usable;
+  $("#pass-status").textContent = `${({confirmed:'ยืนยันแล้ว',active:'เข้าจอด',completed:'ออกแล้ว',cancelled:'ยกเลิก'})[b.status] || b.status} · ${money.format(b.total)}`;
   $("#pass-location").textContent = `${b.location.name} · ช่อง ${b.spotLabel}`;
   $("#pass-code").textContent = b.passCode;
   $("#pass-time").textContent =
@@ -233,6 +241,10 @@ $("#confirm-booking").onclick = async () => {
     message(e.message, true);
   }
 };
+$("#refresh-pass").onclick = async () => {
+  try { pass(await request(`/api/bookings/${state.booking.id}`)); message('อัปเดตการจองแล้ว'); }
+  catch (error) { message(error.message, true); }
+};
 $("#extend-button").onclick = async () => {
   try {
     pass(
@@ -259,6 +271,7 @@ async function init() {
   try {
     const { user } = await request("/api/auth/me");
     if (!user) return location.replace("/login.html");
+    if (user.role === "admin") return window.location.replace("/admin/");
     if (user.role === "landlord") return window.location.replace("/landlord/");
   $("#welcome").textContent = `สวัสดี ${user.name}`;
     const s = new Date();

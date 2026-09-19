@@ -3,7 +3,7 @@ const state = { locations: [], bookings: [], loading: false };
 const money = (value) => new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB', maximumFractionDigits: 0 }).format(value);
 const date = (value) => new Date(value).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' });
 const types = { car: 'รถยนต์', ev: 'EV', motorcycle: 'จักรยานยนต์' };
-const statuses = { confirmed: 'ยืนยันแล้ว', active: 'เข้าจอดแล้ว', completed: 'ออกแล้ว' };
+const statuses = { confirmed: 'ยืนยันแล้ว', active: 'เข้าจอดแล้ว', completed: 'ออกแล้ว', cancelled: 'ยกเลิก' };
 const titles = { overview: ['ภาพรวมลานจอด', 'จัดการพื้นที่และดูแลทุกการจองในที่เดียว'], locations: ['ลานและช่องจอด', 'ตั้งค่าพื้นที่ ราคา และเปิดรับจองจากผู้เช่า'], bookings: ['รายการจอง', 'ดูข้อมูลผู้เช่าและบันทึกการเข้า–ออก'], revenue: ['ยอดการจอง', 'ติดตามมูลค่าการจองของพื้นที่คุณ'] };
 function esc(value) { const node = document.createElement('span'); node.textContent = value ?? ''; return node.innerHTML; }
 function message(text = '', error = false) { $('#status').textContent = text; $('#status').classList.toggle('error', error); }
@@ -100,6 +100,7 @@ $('#logout').onclick = () => run($('#logout'), async () => { await request('/api
   try {
     const { user } = await request('/api/auth/me');
     if (!user) return location.replace('/landlord/login.html');
+    if (user.role === 'admin') return location.replace('/admin/');
     if (user.role !== 'landlord') return location.replace('/');
     $('#welcome').textContent = user.name;
     await refresh();

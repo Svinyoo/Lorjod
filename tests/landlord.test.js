@@ -13,7 +13,7 @@ test('landlord ownership, publishing and shared renter booking lifecycle', async
   const port = socket.address().port;
   await new Promise(resolve => socket.close(resolve));
   const server = spawn(process.execPath, ['server/index.js'], { env: { ...process.env, PORT: String(port), DATA_DIR: dir }, stdio: ['ignore','pipe','pipe'] });
-  t.after(async () => { server.kill(); await new Promise(resolve => server.once('exit', resolve)); await rm(dir, { recursive: true, force: true }); });
+  t.after(async () => { if (server.exitCode === null && server.signalCode === null) { const exited = new Promise(resolve => server.once('exit', resolve)); server.kill(); await exited; } await rm(dir, { recursive: true, force: true }); });
   await new Promise((resolve, reject) => {
     const timer = setTimeout(() => reject(Error('server startup timeout')), 10000);
     server.stdout.once('data', () => { clearTimeout(timer); resolve(); });

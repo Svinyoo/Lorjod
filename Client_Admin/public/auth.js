@@ -14,18 +14,22 @@ async function request(url, options = {}) {
 }
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
+  const button = form.querySelector("button[type=submit]");
+  button.disabled = true;
   try {
     status.textContent = "กำลังดำเนินการ...";
     await request(`/api/auth/${mode}`, {
       method: "POST",
-      body: JSON.stringify({ ...Object.fromEntries(new FormData(form)), role: "renter" }),
+      body: JSON.stringify({ ...Object.fromEntries(new FormData(form)), role: "admin" }),
     });
-    window.location.assign("/");
+    window.location.assign("/admin/");
   } catch (error) {
     status.textContent = error.message;
+  } finally {
+    button.disabled = false;
   }
 });
 (async () => {
   const { user } = await request("/api/auth/me");
-  if (user) window.location.replace(user.role === "admin" ? "/admin/" : user.role === "landlord" ? "/landlord/" : "/");
+  if (user?.role === "admin") window.location.replace("/admin/");
 })().catch(() => {});

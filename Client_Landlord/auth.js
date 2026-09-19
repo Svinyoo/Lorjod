@@ -31,5 +31,5 @@ form.addEventListener("submit", async (event) => {
 });
 (async () => {
   const { user } = await request("/api/auth/me");
-  if (user) window.location.replace(user.role === "landlord" ? "/landlord/" : "/");
+  if (user) window.location.replace(user.role === "admin" ? "/admin/" : user.role === "landlord" ? "/landlord/" : "/");
 })().catch(() => {});

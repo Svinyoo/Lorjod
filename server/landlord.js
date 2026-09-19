@@ -1,14 +1,17 @@
+const { Router } = require("express");
+
 // All owner data is scoped on the server; a client-supplied owner ID is never trusted.
-module.exports = function landlordRoutes(app, db) {
+module.exports = function landlordRoutes(db) {
+  const router = Router();
   const guard = (req, res, next) => {
     if (!req.session.user) return res.status(401).json({ message: "กรุณาเข้าสู่ระบบก่อน" });
     if (req.session.user.role !== "landlord") return res.status(403).json({ message: "สำหรับผู้ให้เช่าเท่านั้น" });
     next();
   };
-  app.use('/api/landlord', guard);
+  router.use(guard);
   const owned = (req, id) => db.get('SELECT * FROM parking_locations WHERE id=? AND owner_id=?', [id, req.session.user.id]);
   const fail = (res, message, status = 400) => res.status(status).json({ message });
-  app.get('/api/landlord/locations', async (req, res) => {
+  router.get('/locations', async (req, res) => {
     const rows = await db.all('SELECT * FROM parking_locations WHERE owner_id=? ORDER BY id DESC', req.session.user.id);
     for (const row of rows) {
       row.spots = await db.all('SELECT id,spot_label,vehicle_type FROM parking_spots WHERE location_id=? ORDER BY id', row.id);
@@ -39,9 +42,9 @@ module.exports = function landlordRoutes(app, db) {
       res.status(201).json({ id: row.lastID });
     }
   };
-  app.post('/api/landlord/locations', save);
-  app.patch('/api/landlord/locations/:id', save);
-  app.post('/api/landlord/locations/:id/spots', async (req, res) => {
+  router.post('/locations', save);
+  router.patch('/locations/:id', save);
+  router.post('/locations/:id/spots', async (req, res) => {
     if (!await owned(req, req.params.id)) return fail(res, 'ไม่พบลานจอดของคุณ', 404);
     const label = typeof req.body?.label === 'string' ? req.body.label.trim() : '';
     const type = req.body?.type;
@@ -54,13 +57,13 @@ module.exports = function landlordRoutes(app, db) {
       throw error;
     }
   });
-  app.get('/api/landlord/bookings', async (req, res) => {
+  router.get('/bookings', async (req, res) => {
     res.json(await db.all(`SELECT b.id,b.start_at,b.end_at,b.total,b.status,b.pass_code,b.payment_method,
       l.name location_name,l.id location_id,p.spot_label,u.name renter_name,v.plate_number,v.vehicle_type
       FROM bookings b JOIN parking_locations l ON l.id=b.location_id JOIN parking_spots p ON p.id=b.spot_id
       JOIN users u ON u.id=b.user_id JOIN vehicles v ON v.id=b.vehicle_id WHERE l.owner_id=? ORDER BY b.start_at DESC,b.id DESC`, req.session.user.id));
   });
-  app.patch('/api/landlord/bookings/:id/status', async (req, res) => {
+  router.patch('/bookings/:id/status', async (req, res) => {
     const b = await db.get(`SELECT b.* FROM bookings b JOIN parking_locations l ON l.id=b.location_id WHERE b.id=? AND l.owner_id=?`, [req.params.id, req.session.user.id]);
     if (!b) return fail(res, 'ไม่พบรายการจองของลานคุณ', 404);
     const status = req.body?.status;
@@ -72,4 +75,5 @@ module.exports = function landlordRoutes(app, db) {
     if (!result.changes) return fail(res, 'สถานะถูกเปลี่ยนแล้ว กรุณาโหลดข้อมูลใหม่', 409);
     res.json({ id: b.id, status });
   });
+  return router;
 };
