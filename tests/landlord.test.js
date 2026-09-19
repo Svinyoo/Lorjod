@@ -1,0 +1,76 @@
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const { spawn } = require('node:child_process');
+const { mkdtemp, rm } = require('node:fs/promises');
+const os = require('node:os');
+const path = require('node:path');
+const net = require('node:net');
+
+test('landlord ownership, publishing and shared renter booking lifecycle', async (t) => {
+  const dir = await mkdtemp(path.join(os.tmpdir(), 'parkly-test-'));
+  const socket = net.createServer();
+  await new Promise(resolve => socket.listen(0, '127.0.0.1', resolve));
+  const port = socket.address().port;
+  await new Promise(resolve => socket.close(resolve));
+  const server = spawn(process.execPath, ['server/index.js'], { env: { ...process.env, PORT: String(port), DATA_DIR: dir }, stdio: ['ignore','pipe','pipe'] });
+  t.after(async () => { server.kill(); await new Promise(resolve => server.once('exit', resolve)); await rm(dir, { recursive: true, force: true }); });
+  await new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(Error('server startup timeout')), 10000);
+    server.stdout.once('data', () => { clearTimeout(timer); resolve(); });
+    server.once('exit', code => { clearTimeout(timer); reject(Error('server exited: ' + code)); });
+  });
+  const base = `http://127.0.0.1:${port}`;
+  function client() {
+    let cookie = '';
+    return async (route, method = 'GET', body, expected = 200) => {
+      const result = await fetch(base + route, { method, headers: { 'Content-Type': 'application/json', Cookie: cookie }, body: body ? JSON.stringify(body) : undefined });
+      if (result.headers.get('set-cookie')) cookie = result.headers.get('set-cookie').split(';')[0];
+      const data = result.status === 204 ? null : await result.json();
+      assert.equal(result.status, expected, `${method} ${route}: ${JSON.stringify(data)}`);
+      return data;
+    };
+  }
+  for (const route of ['/', '/login.html', '/landlord/', '/landlord/register.html', '/landlord/styles.css']) assert.equal((await fetch(base + route)).status, 200);
+  const owner = client(), other = client(), renter = client(), anon = client();
+  await anon('/api/landlord/locations', 'GET', null, 401);
+  const register = (api, email, role) => api('/api/auth/register','POST', { name: role, email, password: 'test-pass-123', role },201);
+  await register(owner,'owner@example.com','landlord');
+  await register(other,'other@example.com','landlord');
+  await register(renter,'renter@example.com','renter');
+  await renter('/api/landlord/locations','GET', null,403);
+  await owner('/api/vehicles','GET', null,403);
+  const values = { name: 'Test Shared Parking', address: 'Bangkok', latitude: 13.7, longitude: 100.5, hourlyRate: 40, landmarks: 'BTS, Park', isPublished: false };
+  const location = await owner('/api/landlord/locations','POST',values,201);
+  assert.ok(!(await renter('/api/parking-locations')).some(l => l.id === location.id));
+  await owner(`/api/landlord/locations/${location.id}`, 'PATCH', { ...values, isPublished: true },400);
+  await other(`/api/landlord/locations/${location.id}`, 'PATCH',values,404);
+  await other(`/api/landlord/locations/${location.id}/spots`,'POST',{label:'A1',type:'car'},404);
+  await owner(`/api/landlord/locations/${location.id}/spots`,'POST',{label:'A1',type:'car'},201);
+  await owner(`/api/landlord/locations/${location.id}/spots`,'POST',{label:'A1',type:'car'},409);
+  await owner(`/api/landlord/locations/${location.id}`, 'PATCH', { ...values, isPublished: true });
+  assert.ok((await renter('/api/parking-locations')).some(l => l.id === location.id));
+  const vehicle = await renter('/api/vehicles','POST',{plateNumber:'TEST123',type:'car'},201);
+  const bookingValues = { locationId: location.id, vehicleId: vehicle.id, vehicleType: 'car', startAt: new Date(Date.now() - 60000).toISOString(), endAt: new Date(Date.now() + 3600000).toISOString() };
+  const b = await renter('/api/bookings','POST',bookingValues,201);
+  await renter('/api/bookings','POST',bookingValues,400);
+  await renter(`/api/bookings/${b.id}/extend`, 'PATCH', { hours: 1 });
+  const rows = await owner('/api/landlord/bookings');
+  assert.equal(rows.length, 1); assert.equal(rows[0].pass_code, b.passCode); assert.equal(rows[0].plate_number, 'TEST123'); assert.equal(rows[0].total, b.total + 40);
+  assert.deepEqual(await other('/api/landlord/bookings'), []);
+  await other(`/api/landlord/bookings/${b.id}/status`, 'PATCH', {status:'active'},404);
+  await renter(`/api/landlord/bookings/${b.id}/status`, 'PATCH', {status:'active'},403);
+  await owner(`/api/landlord/bookings/${b.id}/status`, 'PATCH', {status:'completed'},400);
+  await owner(`/api/landlord/bookings/${b.id}/status`, 'PATCH', {status:'active'});
+  await owner(`/api/landlord/bookings/${b.id}/status`, 'PATCH', {status:'completed'});
+  await owner(`/api/landlord/bookings/${b.id}/status`, 'PATCH', {status:'active'},400);
+  const future = await renter('/api/bookings','POST', { ...bookingValues, startAt: new Date(Date.now()+86400000).toISOString(), endAt: new Date(Date.now()+90000000).toISOString() },201);
+  await owner(`/api/landlord/bookings/${future.id}/status`,'PATCH',{status:'active'},400);
+  await owner(`/api/landlord/locations/${location.id}`, 'PATCH', values);
+  await renter('/api/quotes','POST',bookingValues,400);
+  assert.equal((await owner('/api/landlord/bookings')).length,2);
+  await owner('/api/auth/logout','POST',null,204);
+  await owner('/api/landlord/locations','GET',null,401);
+  await owner('/api/auth/login','POST',{email:'owner@example.com',password:'test-pass-123',role:'renter'},403);
+  const login = await owner('/api/auth/login','POST',{email:'owner@example.com',password:'test-pass-123',role:'landlord'});
+  assert.equal(login.user.role,'landlord');
+});

@@ -259,7 +259,8 @@ async function init() {
   try {
     const { user } = await request("/api/auth/me");
     if (!user) return location.replace("/login.html");
-    $("#welcome").textContent = `สวัสดี ${user.name}`;
+    if (user.role === "landlord") return window.location.replace("/landlord/");
+  $("#welcome").textContent = `สวัสดี ${user.name}`;
     const s = new Date();
     s.setMinutes(Math.ceil(s.getMinutes() / 15) * 15, 0, 0);
     s.setHours(s.getHours() + 1);

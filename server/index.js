@@ -8,7 +8,7 @@ const express = require("express"),
 const { open } = require("sqlite");
 const app = express(),
   port = process.env.PORT || 3000,
-  dataDir = path.join(__dirname, "..", "data");
+  dataDir = process.env.DATA_DIR || path.join(__dirname, "..", "data");
 fs.mkdirSync(dataDir, { recursive: true });
 let db;
 app.use(express.json());
@@ -26,10 +26,12 @@ app.use(
     },
   }),
 );
-app.use(express.static(path.join(__dirname, "..", "client")));
+app.use("/landlord", express.static(path.join(__dirname, "..", "Client_Landlord")));
+app.use(express.static(path.join(__dirname, "..", "client_Renter")));
 const user = (r) => r.session.user || null,
   login = (r, s, n) =>
-    user(r) ? n() : s.status(401).json({ message: "กรุณาเข้าสู่ระบบก่อน" }),
+    !user(r) ? s.status(401).json({ message: "กรุณาเข้าสู่ระบบก่อน" }) :
+      user(r).role === "landlord" ? s.status(403).json({ message: "ฟังก์ชันนี้สำหรับผู้เช่า" }) : n(),
   email = (x) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x),
   labels = { car: "รถยนต์", ev: "EV", motorcycle: "จักรยานยนต์" };
 function sessionFor(r, u) {
@@ -58,7 +60,7 @@ async function available(locationId, type, start, end) {
     "SELECT * FROM parking_locations WHERE id=?",
     locationId,
   );
-  if (!location) throw Error("ไม่พบลานจอด");
+  if (!location || !location.is_published) throw Error("ลานจอดนี้ยังไม่เปิดรับจอง");
   const total = await db.get(
     "SELECT count(*) count FROM parking_spots WHERE location_id=? AND vehicle_type=?",
     [locationId, type],
@@ -117,10 +119,10 @@ app.post("/api/auth/register", async (r, s) => {
   try {
     const hash = await bcrypt.hash(pass, 12),
       x = await db.run(
-        "INSERT INTO users (name,email,password_hash) VALUES (?,?,?)",
-        [name, e, hash],
+        "INSERT INTO users (name,email,password_hash,role) VALUES (?,?,?,?)",
+        [name, e, hash, r.body.role === "landlord" ? "landlord" : "renter"],
       ),
-      u = { id: x.lastID, name, email: e };
+      u = { id: x.lastID, name, email: e, role: r.body.role === "landlord" ? "landlord" : "renter" };
     await sessionFor(r, u);
     s.status(201).json({ user: u });
   } catch (x) {
@@ -139,7 +141,9 @@ app.post("/api/auth/login", async (r, s) => {
     !(await bcrypt.compare(pass, a.password_hash))
   )
     return s.status(401).json({ message: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" });
-  const u = { id: a.id, name: a.name, email: a.email };
+  if (r.body.role && r.body.role !== a.role)
+    return s.status(403).json({ message: "บัญชีนี้เป็นคนละบทบาท กรุณาเข้าสู่ระบบที่หน้าบทบาทของคุณ" });
+  const u = { id: a.id, name: a.name, email: a.email, role: a.role };
   await sessionFor(r, u);
   s.json({ user: u });
 });
@@ -152,7 +156,7 @@ app.get("/api/parking-locations", login, async (r, s) => {
   const q = (r.query.query || "").trim().replace(/^near:.*/, ""),
     term = `%${q}%`,
     rows = await db.all(
-      `SELECT l.*,count(p.id) spots FROM parking_locations l LEFT JOIN parking_spots p ON p.location_id=l.id WHERE l.name LIKE ? OR l.address LIKE ? GROUP BY l.id ORDER BY l.id`,
+      `SELECT l.*,count(p.id) spots FROM parking_locations l LEFT JOIN parking_spots p ON p.location_id=l.id WHERE l.is_published=1 AND (l.name LIKE ? OR l.address LIKE ?) GROUP BY l.id ORDER BY l.id`,
       [term, term],
     ),
     now = new Date(),
@@ -161,7 +165,7 @@ app.get("/api/parking-locations", login, async (r, s) => {
     await Promise.all(
       rows.map(async (l) => {
         const booked = await db.get(
-          `SELECT count(*) count FROM bookings b JOIN parking_spots p ON p.id=b.spot_id WHERE p.location_id=? AND p.vehicle_type='car' AND b.status IN ('confirmed','active') AND b.start_at<? AND b.end_at>?`,
+          `SELECT count(*) count FROM bookings b JOIN parking_spots p ON p.id=b.spot_id WHERE p.location_id=? AND b.status IN ('confirmed','active') AND b.start_at<? AND b.end_at>?`,
           [l.id, end.toISOString(), now.toISOString()],
         );
         return {
@@ -324,6 +328,21 @@ async function start() {
   await db.exec(
     `PRAGMA foreign_keys=ON;CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT NOT NULL,email TEXT NOT NULL UNIQUE,password_hash TEXT NOT NULL,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);CREATE TABLE IF NOT EXISTS parking_locations(id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT NOT NULL,address TEXT NOT NULL,latitude REAL NOT NULL,longitude REAL NOT NULL,landmarks TEXT NOT NULL,hourly_rate INTEGER NOT NULL);CREATE TABLE IF NOT EXISTS parking_spots(id INTEGER PRIMARY KEY AUTOINCREMENT,location_id INTEGER NOT NULL,spot_label TEXT NOT NULL,vehicle_type TEXT NOT NULL CHECK(vehicle_type IN ('car','ev','motorcycle')),FOREIGN KEY(location_id) REFERENCES parking_locations(id),UNIQUE(location_id,spot_label));CREATE TABLE IF NOT EXISTS vehicles(id INTEGER PRIMARY KEY AUTOINCREMENT,user_id INTEGER NOT NULL,plate_number TEXT NOT NULL,vehicle_type TEXT NOT NULL,description TEXT,is_favorite INTEGER NOT NULL DEFAULT 0,FOREIGN KEY(user_id) REFERENCES users(id));CREATE TABLE IF NOT EXISTS bookings(id INTEGER PRIMARY KEY AUTOINCREMENT,user_id INTEGER NOT NULL,location_id INTEGER NOT NULL,spot_id INTEGER NOT NULL,vehicle_id INTEGER NOT NULL,start_at TEXT NOT NULL,end_at TEXT NOT NULL,total INTEGER NOT NULL,payment_method TEXT NOT NULL,status TEXT NOT NULL,pass_code TEXT NOT NULL UNIQUE,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,FOREIGN KEY(user_id) REFERENCES users(id),FOREIGN KEY(location_id) REFERENCES parking_locations(id),FOREIGN KEY(spot_id) REFERENCES parking_spots(id),FOREIGN KEY(vehicle_id) REFERENCES vehicles(id));CREATE INDEX IF NOT EXISTS bookings_slot_range ON bookings(spot_id,start_at,end_at);CREATE TABLE IF NOT EXISTS notifications(id INTEGER PRIMARY KEY AUTOINCREMENT,user_id INTEGER NOT NULL,booking_id INTEGER NOT NULL,kind TEXT NOT NULL,scheduled_at TEXT NOT NULL,sent_at TEXT,FOREIGN KEY(user_id) REFERENCES users(id),FOREIGN KEY(booking_id) REFERENCES bookings(id));`,
   );
+  // Additive migrations preserve existing renter accounts and sample locations.
+  for (const [table, column, definition] of [
+    ["users", "role", "TEXT NOT NULL DEFAULT 'renter'"],
+    ["parking_locations", "owner_id", "INTEGER REFERENCES users(id)"],
+    ["parking_locations", "is_published", "INTEGER NOT NULL DEFAULT 1"],
+  ]) {
+    const columns = await db.all(`PRAGMA table_info(${table})`);
+    if (!columns.some((c) => c.name === column))
+      await db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  }
+  require("./landlord")(app, db);
+  app.use((err, r, s, next) => {
+    console.error(err);
+    s.status(500).json({ message: "เกิดข้อผิดพลาดในระบบ กรุณาลองใหม่" });
+  });
   const count = await db.get("SELECT count(*) count FROM parking_locations");
   if (!count.count)
     await db.exec(

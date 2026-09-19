@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="th">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Parkly Landlord — จัดการลานจอด</title><link rel="stylesheet" href="styles.css"></head>
+<body class="dashboard">
+  <aside class="sidebar">
+    <a class="brand" href="/landlord/">PARKLY<span>LANDLORD · ผู้ให้เช่า</span></a>
+    <p class="nav-caption">พื้นที่จัดการของคุณ</p>
+    <nav aria-label="เมนูผู้ให้เช่า">
+      <button class="nav-item active" data-page="overview" aria-current="page">◫ <span>ภาพรวม</span></button>
+      <button class="nav-item" data-page="locations">▤ <span>ลานและช่องจอด</span></button>
+      <button class="nav-item" data-page="bookings">≡ <span>รายการจอง</span></button>
+      <button class="nav-item" data-page="revenue">฿ <span>ยอดการจอง</span></button>
+    </nav>
+    <div class="sidebar-note">พื้นที่ว่างของคุณ<br><strong>เป็นที่จอดของใครสักคน</strong><p>เปิดลาน → รับจอง → ดูแลเข้า–ออก</p></div>
+  </aside>
+  <main class="workspace">
+    <header class="topbar"><span class="role-tag">สำหรับผู้ให้เช่า</span><div class="account"><span id="welcome"></span><button id="logout" class="secondary">ออกจากระบบ</button></div></header>
+    <div class="page-heading"><div><p class="eyebrow">YOUR PARKING BUSINESS</p><h1 id="page-title">ภาพรวมลานจอด</h1><p id="page-description">จัดการพื้นที่และดูแลทุกการจองในที่เดียว</p></div><button id="refresh" class="secondary">↻ อัปเดตข้อมูล</button></div>
+    <p id="status" role="status" aria-live="polite"></p>
+    <section data-panel="overview">
+      <div class="hero-banner"><div><span class="role-tag">PARKLY PARTNER</span><h2>พร้อมต้อนรับผู้เช่า<br>ในพื้นที่ของคุณ</h2><p>ตรวจสอบลานที่เปิดรับจอง และติดตามรถที่เข้าจอด</p></div><button data-go="locations">จัดการลานจอด →</button></div>
+      <div id="metrics" class="metrics"></div>
+      <div class="section-heading"><div><h2>การจองที่รอดำเนินการ</h2><p>รายการยืนยันแล้วและรถที่กำลังเข้าจอด</p></div><button class="secondary" data-go="bookings">ดูทั้งหมด →</button></div><div id="upcoming" class="booking-list"></div>
+    </section>
+    <section data-panel="locations" hidden>
+      <div class="section-heading"><div><h2>ลานจอดของฉัน</h2><p>ลานที่เปิดรับจองจะปรากฏในหน้าค้นหาของผู้เช่า</p></div><button id="new-location">+ เพิ่มลานจอด</button></div>
+      <form id="location-form" class="panel form-grid" hidden>
+        <h2 id="form-title" class="full">เพิ่มลานจอดใหม่</h2><input type="hidden" name="id">
+        <label>ชื่อลานจอด<input name="name" maxlength="120" required></label><label>ที่อยู่<input name="address" maxlength="300" required></label>
+        <label>ละติจูด<input name="latitude" type="number" step="any" min="-90" max="90" required></label><label>ลองจิจูด<input name="longitude" type="number" step="any" min="-180" max="180" required></label>
+        <label>ราคา / ชั่วโมง (บาท)<input name="hourlyRate" type="number" min="1" max="10000" step="1" required></label><label>จุดสังเกต (คั่นด้วย ,)<input name="landmarks" maxlength="500" placeholder="BTS, ห้างสรรพสินค้า"></label>
+        <label class="checkbox full"><input name="isPublished" type="checkbox"> เปิดรับจองจากผู้เช่า</label><p id="publish-hint" class="muted full">ลานใหม่จะบันทึกเป็นฉบับร่าง เพิ่มช่องจอดก่อนเปิดรับจอง</p>
+        <div class="actions full"><button type="submit">บันทึกลานจอด</button><button type="button" id="cancel-location" class="secondary">ยกเลิก</button></div>
+      </form><div id="location-list" class="location-grid"></div>
+    </section>
+    <section data-panel="bookings" hidden>
+      <div class="filters"><label>ค้นหาการจอง<input id="booking-search" type="search" placeholder="ชื่อผู้เช่า ทะเบียน หรือรหัส Pass"></label><label>สถานะ<select id="booking-filter"><option value="">ทุกสถานะ</option value="confirmed">ยืนยันแล้ว</option><option value="active">เข้าจอดแล้ว</option><option value="completed">ออกแล้ว</option></select></label></div><p class="muted">ตรวจสอบรหัส Pass กับผู้เช่าก่อนบันทึกเข้าจอด (เช็กอินได้ในช่วงเวลาที่จอง)</p><div id="booking-list" class="booking-list"></div>
+    </section>
+    <section data-panel="revenue" hidden><div class="panel"><h2>มูลค่าการจองแยกตามลาน</h2><p class="muted">รวมรายการยืนยันแล้ว เข้าจอด และออกแล้วทั้งหมด ไม่ใช่ยอดรับเงินจริงหรือยอดถอนเงิน</p><div id="revenue-list"></div></div></section>
+    <footer>ข้อมูลร่วมกับ Parkly ผู้เช่า · กดอัปเดตข้อมูลเพื่อดูรายการล่าสุด</footer>
+  </main><script src="app.js"></script>
+</body></html>
