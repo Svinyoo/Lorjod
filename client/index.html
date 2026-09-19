@@ -7,28 +7,150 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body class="parking-page">
-    <header class="app-header"><a class="brand" href="/">PARKLY</a><div class="account"><span id="welcome"></span><button id="logout" class="text-button" type="button">ออกจากระบบ</button></div></header>
+    <header class="app-header">
+      <a class="brand" href="/">PARKLY</a>
+      <div class="account">
+        <span id="welcome"></span
+        ><button id="logout" class="text-button" type="button">ออก</button>
+      </div>
+    </header>
     <main class="booking-shell">
-      <section class="hero"><p class="eyebrow">PARKING RESERVATION</p><h1>จอดง่าย จองล่วงหน้าได้</h1><p>เลือกที่จอด เวลา และรถของคุณ แล้วรับ QR Pass พร้อมใช้</p></section>
-      <ol class="steps" aria-label="ขั้นตอนการจอง"><li class="active"><b>1</b> สถานที่</li><li><b>2</b> เวลาและรถ</li><li><b>3</b> ตรวจสอบและชำระ</li><li><b>4</b> QR Pass</li></ol>
+      <section class="hero">
+        <p class="eyebrow">PARKING</p>
+        <h1>จองที่จอดรถ</h1>
+        <p>เลือกที่จอด เวลา และรถของคุณ</p>
+      </section>
+      <ol class="steps" aria-label="ขั้นตอนการจอง">
+        <li class="active"><b>1</b> ที่จอด</li>
+        <li><b>2</b> เวลา</li>
+        <li><b>3</b> สรุป</li>
+        <li><b>4</b> Pass</li>
+      </ol>
       <section id="booking-card" class="booking-card">
         <section class="step-panel active" data-step="1">
-          <div class="section-heading"><div><h2>เลือกสถานที่จอด</h2><p>ค้นหาสถานที่ หรือเลือกจากลานที่อยู่ใกล้คุณ</p></div><button id="nearby-button" type="button" class="secondary">⌖ ใกล้ฉัน</button></div>
-          <label class="search"><span>⌕</span><input id="location-search" type="search" placeholder="ชื่อสถานที่ เช่น สยาม, อโศก" autocomplete="off" /></label>
-          <div id="location-list" class="location-list" aria-live="polite"></div>
+          <div class="section-heading">
+            <div>
+              <h2>เลือกที่จอด</h2>
+              <p>ค้นหาหรือเลือกที่ใกล้คุณ</p>
+            </div>
+            <button id="nearby-button" type="button" class="secondary">
+              ⌖ ใกล้ฉัน
+            </button>
+          </div>
+          <label class="search"
+            ><span>⌕</span
+            ><input
+              id="location-search"
+              type="search"
+              placeholder="ค้นหาสถานที่"
+              autocomplete="off"
+          /></label>
+          <div
+            id="location-list"
+            class="location-list"
+            aria-live="polite"
+          ></div>
         </section>
         <section class="step-panel" data-step="2">
-          <button type="button" class="back-button" data-back="1">← กลับไปเลือกสถานที่</button><h2>เวลาและข้อมูลรถ</h2><div id="selected-place" class="selected-place"></div>
+          <button type="button" class="back-button" data-back="1">
+            ← กลับ
+          </button>
+          <h2>เวลาและรถ</h2>
+          <div id="selected-place" class="selected-place"></div>
           <form id="details-form" class="form-grid">
-            <label>วันจอด<input id="start-date" type="date" required /></label><label>เวลาเข้า (Check-in)<input id="start-time" type="time" required /></label><label>เวลาออก (Check-out)<input id="end-time" type="time" required /></label><label>หรือจำนวนชั่วโมง<select id="hours"><option value="">เลือกเวลาออกเอง</option><option value="1">1 ชั่วโมง</option><option value="2">2 ชั่วโมง</option><option value="3">3 ชั่วโมง</option><option value="4">4 ชั่วโมง</option><option value="8">8 ชั่วโมง</option></select></label>
-            <fieldset class="vehicle-field"><legend>รถที่ใช้จอด</legend><div id="vehicle-list" class="vehicle-list"></div><button id="add-vehicle" type="button" class="secondary">+ เพิ่มรถคันใหม่</button></fieldset>
-            <div id="new-vehicle" class="new-vehicle hidden"><label>ทะเบียนรถ<input id="plate-number" placeholder="เช่น 1กข 1234" /></label><label>ประเภทรถ<select id="vehicle-type"><option value="car">รถยนต์</option><option value="ev">EV</option><option value="motorcycle">จักรยานยนต์</option></select></label><label>ยี่ห้อ / สี<input id="vehicle-description" placeholder="เช่น Tesla สีขาว" /></label><label class="favorite"><input id="favorite-vehicle" type="checkbox" checked /> บันทึกเป็นรถคันโปรด</label></div>
-            <div class="quote-box"><span>ราคาโดยประมาณ</span><strong id="quote-price">—</strong><small id="quote-detail">เลือกเวลาและรถเพื่อดูราคา</small></div><button type="submit">ไปที่สรุปการจอง</button>
+            <label>วันที่<input id="start-date" type="date" required /></label
+            ><label>เข้า<input id="start-time" type="time" required /></label
+            ><label>ออก<input id="end-time" type="time" required /></label
+            ><label
+              >ระยะเวลา<select id="hours">
+                <option value="">เลือกเวลาออก</option>
+                <option value="1">1 ชั่วโมง</option>
+                <option value="2">2 ชั่วโมง</option>
+                <option value="3">3 ชั่วโมง</option>
+                <option value="4">4 ชั่วโมง</option>
+                <option value="8">8 ชั่วโมง</option>
+              </select></label
+            >
+            <fieldset class="vehicle-field">
+              <legend>รถ</legend>
+              <div id="vehicle-list" class="vehicle-list"></div>
+              <button id="add-vehicle" type="button" class="secondary">
+                + เพิ่มรถ
+              </button>
+            </fieldset>
+            <div id="new-vehicle" class="new-vehicle hidden">
+              <label
+                >ทะเบียนรถ<input
+                  id="plate-number"
+                  placeholder="1กข 1234" /></label
+              ><label
+                >ประเภทรถ<select id="vehicle-type">
+                  <option value="car">รถยนต์</option>
+                  <option value="ev">EV</option>
+                  <option value="motorcycle">จักรยานยนต์</option>
+                </select></label
+              ><label
+                >ยี่ห้อ / สี<input
+                  id="vehicle-description"
+                  placeholder="เช่น Tesla สีขาว" /></label
+              ><label class="favorite"
+                ><input id="favorite-vehicle" type="checkbox" checked />
+                รถคันโปรด</label
+              >
+            </div>
+            <div class="quote-box">
+              <span>ราคารวม</span><strong id="quote-price">—</strong
+              ><small id="quote-detail">เลือกเวลาและรถ</small>
+            </div>
+            <button type="submit">ดูสรุป</button>
           </form>
         </section>
-        <section class="step-panel" data-step="3"><button type="button" class="back-button" data-back="2">← แก้ไขรายละเอียด</button><h2>สรุปการจอง</h2><div id="booking-summary" class="summary"></div><label class="payment-label">ช่องทางชำระเงิน<select id="payment-method"><option value="promptpay">PromptPay</option><option value="card">บัตรเครดิต / เดบิต</option><option value="cash">ชำระที่ลานจอด</option></select></label><p class="notice">การกดยืนยันเป็นการจำลองการชำระเงิน และจะล็อกช่องจอดให้คุณทันที</p><button id="confirm-booking" type="button">ยืนยันและรับ QR Pass</button></section>
-        <section class="step-panel" data-step="4"><div class="pass-success">✓ จองที่จอดสำเร็จแล้ว</div><h2>Digital Parking Pass</h2><p id="pass-location" class="pass-location"></p><div class="pass-layout"><div id="qr-code" class="qr-code" aria-label="QR Code สำหรับเข้าลานจอด"></div><div><p class="pass-code-label">รหัสผ่านเข้า-ออก</p><strong id="pass-code" class="pass-code"></strong><p id="pass-time" class="muted"></p></div></div><div id="countdown" class="countdown"></div><div class="pass-actions"><a id="navigate-link" class="secondary link-button" target="_blank" rel="noopener">นำทางไปลานจอด</a><button id="extend-button" type="button" class="secondary">ขยายเวลาจอด</button><button id="new-booking" type="button">จองที่จอดอีกครั้ง</button></div></section>
-      </section><p id="status" class="status" role="status" aria-live="polite"></p>
-    </main><script src="app.js"></script>
+        <section class="step-panel" data-step="3">
+          <button type="button" class="back-button" data-back="2">
+            ← กลับ
+          </button>
+          <h2>สรุปการจอง</h2>
+          <div id="booking-summary" class="summary"></div>
+          <label class="payment-label"
+            >ชำระเงิน<select id="payment-method">
+              <option value="promptpay">PromptPay</option>
+              <option value="card">บัตรเครดิต / เดบิต</option>
+              <option value="cash">ชำระที่ลานจอด</option>
+            </select></label
+          ><button id="confirm-booking" type="button">ยืนยันการจอง</button>
+        </section>
+        <section class="step-panel" data-step="4">
+          <div class="pass-success">✓ จองสำเร็จ</div>
+          <h2>Parking Pass</h2>
+          <p id="pass-location" class="pass-location"></p>
+          <div class="pass-layout">
+            <div
+              id="qr-code"
+              class="qr-code"
+              aria-label="QR Code สำหรับเข้าลานจอด"
+            ></div>
+            <div>
+              <p class="pass-code-label">รหัสเข้า-ออก</p>
+              <strong id="pass-code" class="pass-code"></strong>
+              <p id="pass-time" class="muted"></p>
+            </div>
+          </div>
+          <div id="countdown" class="countdown"></div>
+          <div class="pass-actions">
+            <a
+              id="navigate-link"
+              class="secondary link-button"
+              target="_blank"
+              rel="noopener"
+              >นำทาง</a
+            ><button id="extend-button" type="button" class="secondary">
+              + 1 ชั่วโมง</button
+            ><button id="new-booking" type="button">จองอีกครั้ง</button>
+          </div>
+        </section>
+      </section>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+    </main>
+    <script src="app.js"></script>
   </body>
 </html>

@@ -26,28 +26,28 @@ npm start
 
 ทุก endpoint ด้านล่างต้องมี session จากการล็อกอิน ยกเว้น auth endpoints
 
-| Method | Path | Request / Response หลัก |
-| --- | --- | --- |
-| GET | `/api/parking-locations?query=` | `[{ id, name, address, landmarks[], latitude, longitude, hourlyRate, availableSpaces }]` |
-| GET / POST | `/api/vehicles` | POST: `{ plateNumber, type: "car"\|"ev"\|"motorcycle", description, isFavorite }` |
-| POST | `/api/quotes` | Request: `{ locationId, vehicleType, startAt, endAt }`; response: `{ durationHours, total, availableSpaces, rateDescription }` |
-| POST | `/api/bookings` | Request: quote fields + `{ vehicleId, paymentMethod }`; response: `{ id, startAt, endAt, total, passCode, spotLabel, location }` |
-| PATCH | `/api/bookings/:id/extend` | `{ hours }` — ยืนยันว่า slot ยังไม่มีผู้จองซ้อนก่อนขยาย |
-| GET | `/api/auth/me` | `{ user }` |
-| POST | `/api/auth/register`, `/api/auth/login`, `/api/auth/logout` | Session authentication |
+| Method     | Path                                                        | Request / Response หลัก                                                                                                          |
+| ---------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| GET        | `/api/parking-locations?query=`                             | `[{ id, name, address, landmarks[], latitude, longitude, hourlyRate, availableSpaces }]`                                         |
+| GET / POST | `/api/vehicles`                                             | POST: `{ plateNumber, type: "car"\|"ev"\|"motorcycle", description, isFavorite }`                                                |
+| POST       | `/api/quotes`                                               | Request: `{ locationId, vehicleType, startAt, endAt }`; response: `{ durationHours, total, availableSpaces, rateDescription }`   |
+| POST       | `/api/bookings`                                             | Request: quote fields + `{ vehicleId, paymentMethod }`; response: `{ id, startAt, endAt, total, passCode, spotLabel, location }` |
+| PATCH      | `/api/bookings/:id/extend`                                  | `{ hours }` — ยืนยันว่า slot ยังไม่มีผู้จองซ้อนก่อนขยาย                                                                          |
+| GET        | `/api/auth/me`                                              | `{ user }`                                                                                                                       |
+| POST       | `/api/auth/register`, `/api/auth/login`, `/api/auth/logout` | Session authentication                                                                                                           |
 
 เวลาใช้ ISO 8601 จาก client ไป API และเก็บเป็น UTC string ใน SQLite; API ปัดระยะเวลาขึ้นเป็นจำนวนเต็มชั่วโมงก่อนคิดราคา ระบบเช็ก overlapping interval ด้วยเงื่อนไข `existing.start_at < requested.end_at AND existing.end_at > requested.start_at`
 
 ## Database schema (เบื้องต้น)
 
-| Table | Purpose / fields สำคัญ |
-| --- | --- |
-| `users` | ผู้ใช้และ `password_hash` |
-| `parking_locations` | ชื่อลาน, ที่อยู่, พิกัด, landmarks JSON, `hourly_rate` |
-| `parking_spots` | ช่องจริงในลาน, `spot_label`, ประเภทรถ (`car`, `ev`, `motorcycle`) |
-| `vehicles` | รถของผู้ใช้: ทะเบียน, ประเภทรถ, รายละเอียด, `is_favorite` |
-| `bookings` | ผู้จอง, ลาน, ช่อง, รถ, เวลาเริ่ม/จบ, ยอดเงิน, สถานะ, payment, pass code |
-| `notifications` | งานแจ้งเตือนที่ schedule ได้ต่อการจอง และเวลาที่ส่งแล้ว |
+| Table               | Purpose / fields สำคัญ                                                  |
+| ------------------- | ----------------------------------------------------------------------- |
+| `users`             | ผู้ใช้และ `password_hash`                                               |
+| `parking_locations` | ชื่อลาน, ที่อยู่, พิกัด, landmarks JSON, `hourly_rate`                  |
+| `parking_spots`     | ช่องจริงในลาน, `spot_label`, ประเภทรถ (`car`, `ev`, `motorcycle`)       |
+| `vehicles`          | รถของผู้ใช้: ทะเบียน, ประเภทรถ, รายละเอียด, `is_favorite`               |
+| `bookings`          | ผู้จอง, ลาน, ช่อง, รถ, เวลาเริ่ม/จบ, ยอดเงิน, สถานะ, payment, pass code |
+| `notifications`     | งานแจ้งเตือนที่ schedule ได้ต่อการจอง และเวลาที่ส่งแล้ว                 |
 
 มี index `bookings_slot_range (spot_id, start_at, end_at)` เพื่อรองรับการตรวจช่วงเวลาจองซ้อนในระดับต้นแบบ
 
