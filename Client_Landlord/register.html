@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>สมัครสมาชิก</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-mode="register">
+    <main class="card auth-card">
+      <p class="eyebrow">PARKLY · LANDLORD</p>
+      <h1>สร้างบัญชีผู้ให้เช่า</h1>
+      <p class="subtitle">เปิดพื้นที่ของคุณให้ผู้เช่าค้นพบ</p>
+
+      <form id="auth-form" class="auth-form">
+        <label>
+          ชื่อที่แสดง
+          <input type="text" name="name" autocomplete="name" required />
+        </label>
+
+        <label>
+          อีเมล
+          <input type="email" name="email" autocomplete="email" required />
+        </label>
+
+        <label>
+          รหัสผ่าน <small>อย่างน้อย 8 ตัวอักษร</small>
+          <input
+            type="password"
+            name="password"
+            autocomplete="new-password"
+            minlength="8"
+            required
+          />
+        </label>
+
+        <button type="submit">สมัครสมาชิก</button>
+      </form>
+
+      <p id="status" role="status" aria-live="polite"></p>
+      <p>
+        มีบัญชีอยู่แล้ว?
+        <a class="auth-link" href="login.html">เข้าสู่ระบบ</a>
+      </p>
+      <p><a class="auth-link" href="/login.html">สำหรับผู้เช่าที่จอดรถ →</a></p>
+    </main>
+
+    <script src="auth.js"></script>
+  </body>
+</html>

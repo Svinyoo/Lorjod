@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>เข้าสู่ระบบ</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-mode="login">
+    <main class="card auth-card">
+      <p class="eyebrow">PARKLY · ADMIN</p>
+      <h1>เข้าสู่ระบบผู้ดูแลระบบ</h1>
+      <p class="subtitle">ตรวจสอบและแก้ไขข้อมูลระหว่างผู้เช่าและผู้ให้เช่า</p>
+      <form id="auth-form" class="auth-form">
+        <label
+          >อีเมล<input
+            type="email"
+            name="email"
+            autocomplete="email"
+            required /></label
+        ><label
+          >รหัสผ่าน<input
+            type="password"
+            name="password"
+            autocomplete="current-password"
+            required /></label
+        ><button type="submit">เข้าสู่ระบบ</button>
+      </form>
+      <p id="status" role="status" aria-live="polite"></p>
+      <p>
+        บัญชีผู้ดูแลระบบสร้างโดยผู้ดูแลเซิร์ฟเวอร์เท่านั้น
+      </p>
+      <p><a class="auth-link" href="/login.html">สำหรับผู้เช่าที่จอดรถ →</a></p>
+    </main>
+    <script src="auth.js"></script>
+  </body>
+</html>
