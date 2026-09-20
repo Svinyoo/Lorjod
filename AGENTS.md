@@ -100,7 +100,7 @@ Browser: Renter / Landlord / Admin (HTML + CSS + JavaScript)
 
 | ส่วน | เทคโนโลยีปัจจุบัน |
 | --- | --- |
-| Runtime | Node.js; README ระบุขั้นต่ำ 18 ให้ตรวจเวอร์ชันที่ใช้งานจริงก่อนเปลี่ยน runtime |
+| Runtime | Node.js >=20.17.0; tested with Node.js 24 (`.nvmrc`) |
 | Backend | Express 5, JavaScript แบบ CommonJS |
 | Database | SQLite ผ่าน `sqlite` และ `sqlite3` |
 | Authentication | `express-session`, `bcryptjs` |
@@ -134,7 +134,7 @@ Lorjod/                # ชื่อโฟลเดอร์ clone เปลี
   data/app.db          # สร้างขณะรัน หรือเปลี่ยนที่เก็บด้วย DATA_DIR
 ```
 
-**ข้อควรตรวจ:** `index.js` อ้าง `Client_Renter` แต่ working tree ใช้ `client_Renter` อาจมีปัญหาบน filesystem ที่แยกตัวพิมพ์เล็ก/ใหญ่ ตรวจและแก้แบบมีขอบเขตเมื่อทำงานเกี่ยวกับเส้นทางหรือ deployment อย่าสมมติว่าทำงานบน Linux แล้ว
+Use `client_Renter` consistently in directory names, static routes, and documentation for case-sensitive filesystems.
 
 ## 11. Database & Data Model
 

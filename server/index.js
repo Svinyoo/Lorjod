@@ -28,7 +28,7 @@ async function start() {
 
   app.use("/admin", express.static(path.join(__dirname, "..", "Client_Admin", "public")));
   app.use("/landlord", express.static(path.join(__dirname, "..", "Client_Landlord")));
-  app.use(express.static(path.join(__dirname, "..", "Client_Renter")));
+  app.use(express.static(path.join(__dirname, "..", "client_Renter")));
 
   app.use("/api/auth", authRoutes(db));
   app.use("/api/landlord", landlordRoutes(db));

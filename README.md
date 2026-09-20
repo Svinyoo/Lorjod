@@ -4,7 +4,7 @@
 
 ## เริ่มต้น
 
-ต้องมี Node.js 18 ขึ้นไป
+ต้องมี Node.js 20.17.0 ขึ้นไป
 
 ```bash
 npm install
@@ -24,7 +24,7 @@ server/
   admin.js         API ผู้ดูแล: แก้ไขข้อมูลและบันทึกประวัติ
   database.js      เปิดฐานข้อมูล สร้างตาราง migration และข้อมูลตัวอย่าง
   create-admin.js  คำสั่งสร้างบัญชี Admin บนเซิร์ฟเวอร์
-Client_Renter/     หน้าเว็บผู้เช่า
+client_Renter/     หน้าเว็บผู้เช่า
 Client_Landlord/   หน้าเว็บผู้ให้เช่า
 Client_Admin/
   public/          หน้าเว็บผู้ดูแล
@@ -86,7 +86,7 @@ Admin ใช้ connection แยกไปยังฐานข้อมูล�
 
 เปิด `http://localhost:3000/landlord/register.html` เพื่อสมัครบัญชีผู้ให้เช่า หรือ `/landlord/login.html` เพื่อเข้าสู่ระบบ ส่วนผู้เช่าใช้ `/` และ `/login.html` ตามเดิม
 
-โครงสร้างไฟล์ขนานกับ `Client_Renter`: `index.html`, `app.js`, `styles.css`, `login.html`, `register.html`, `auth.js` ฝั่งผู้ให้เช่าใช้ sidebar สีเขียวเข้มและสีทอง พร้อมป้ายบทบาท แทนขั้นตอนการจองของผู้เช่า
+โครงสร้างไฟล์ขนานกับ `client_Renter`: `index.html`, `app.js`, `styles.css`, `login.html`, `register.html`, `auth.js` ฝั่งผู้ให้เช่าใช้ sidebar สีเขียวเข้มและสีทอง พร้อมป้ายบทบาท แทนขั้นตอนการจองของผู้เช่า
 
 1. **ลานและช่องจอด** — เพิ่มลานเป็นฉบับร่าง ระบุที่อยู่ พิกัด ราคา และจุดสังเกต เพิ่มช่องจอดพร้อมประเภทรถ แล้วกดแก้ไขลานเพื่อเปิดรับจอง
 2. **เชื่อมกับผู้เช่า** — ลานที่เปิดรับจองแสดงในหน้าค้นหาของผู้เช่าทันที ใช้ราคา ช่องจอด และการจองจากฐานข้อมูลเดียวกัน กดอัปเดตข้อมูลเพื่อโหลดรายการใหม่
@@ -123,3 +123,18 @@ Admin ใช้ connection แยกไปยังฐานข้อมูล�
 รันเฉพาะ Renter ด้วย `node --test tests/renter.test.js` หรือรันทุกฝั่งด้วย `npm test`
 
 `tests/renter.test.js` ทดสอบ API ผ่าน HTTP และ session จริง 7 กลุ่ม: หน้าเว็บและสิทธิ์เข้าถึง, สมัคร/เข้าสู่ระบบ/ออกจากระบบ, รถและรถคันโปรด, ค้นหาลาน, คำนวณราคาและตรวจช่วงเวลา, จองและป้องกันเข้าถึงข้อมูลผู้อื่น/จองซ้อน, ขยายเวลาและตรวจยอดเงิน ใช้ฐานข้อมูลชั่วคราวซึ่งลบหลังทดสอบ ไม่แตะ `data/app.db` การทดสอบนี้ยังไม่ใช่การทดสอบคลิกใช้งานผ่านเบราว์เซอร์
+
+## VS Code setup
+
+Open this repository folder in VS Code, or open the local `Lorjod.code-workspace` in its parent folder. In the integrated terminal run:
+
+```sh
+npm ci
+npm start
+```
+
+Visit `http://localhost:3000` (Renter), `/landlord/` (Landlord), or `/admin/` (Admin). Run `npm test` to verify the app. Use Run and Debug > Run Lorjod to start with the debugger.
+
+`node_modules/` contains reinstallable dependencies. `data/` contains runtime data: do not delete it during cleanup.
+
+Runtime: Node.js >=20.17.0 is required by sqlite3 6. This project is tested with Node.js 24; `.nvmrc` selects that major version.
