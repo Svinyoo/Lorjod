@@ -1,6 +1,6 @@
 # Parkly — ระบบจองที่จอดรถ
 
-แอพ iOS แยกสำหรับ Renter, Landlord และ Admin อยู่ใน `Mobile app/` อ่านวิธีตั้งค่า Xcode ติดตั้งบน iPhone และเข้าใช้งานที่ [Readme_app.md](Readme_app.md) รุ่นนี้เป็น SwiftUI/WKWebView ที่ใช้เซิร์ฟเวอร์เดิม ยังไม่มีไฟล์ติดตั้งที่เซ็นหรือเผยแพร่แล้ว
+แอพ iOS แยกสำหรับ Renter, Landlord และ Admin อยู่ใน `Mobile app/` อ่านวิธีตั้งค่า Xcode ติดตั้งบน iPhone และเข้าใช้งานที่ [Readme_appIOS.md](Readme_appIOS.md) รุ่นนี้เป็น SwiftUI/WKWebView ที่ใช้เซิร์ฟเวอร์เดิม ยังไม่มีไฟล์ติดตั้งที่เซ็นหรือเผยแพร่แล้ว
 
 เว็บแอปสำหรับผู้จองที่ล็อกอินแล้ว: ค้นหาลานจอด, เลือกเวลา/รถ, เห็นราคาและช่องว่างแบบเรียลไทม์, ยืนยันการจอง และรับ Digital Pass พร้อม QR-style code
 

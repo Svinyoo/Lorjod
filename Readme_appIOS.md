@@ -1,6 +1,6 @@
 # คู่มือแอพ iOS ของ Parkly
 
-อ่านวิธีติดตั้งและใช้งานฉบับเต็มที่ **[Mobile app/Readme_app.md](Mobile%20app/Readme_app.md)**
+อ่านวิธีติดตั้งและใช้งานฉบับเต็มที่ **[Mobile app/Readme_appIOS.md](Mobile%20app/Readme_appIOS.md)**
 
 มี Xcode project หนึ่งชุดและแอพแยกสาม targets: Parkly Renter, Parkly Landlord และ Parkly Admin ติดตั้งพร้อมกัน ใช้ session แยกกัน และเชื่อมกับเซิร์ฟเวอร์ Parkly เดิม
 

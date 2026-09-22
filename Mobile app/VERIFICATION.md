@@ -23,7 +23,7 @@
 - การตรวจ layout ใน browser: การเปิดหน้า local ผ่าน `file://` ถูกปิดกั้นโดย URL policy ของเครื่องมือ จึงไม่ได้ดำเนินการต่อด้วยวิธีเลี่ยงข้อจำกัด
 - Archive, `.ipa`, TestFlight upload และ App Store review
 
-**อย่าใช้รายงานนี้อ้างว่า iOS build หรือการติดตั้งบนเครื่องจริงผ่านแล้ว** ขั้นตอนที่เหลือให้ทำตาม [Readme_app.md](Readme_app.md) หัวข้อ Simulator, iPhone, Release และรายการทดสอบ
+**อย่าใช้รายงานนี้อ้างว่า iOS build หรือการติดตั้งบนเครื่องจริงผ่านแล้ว** ขั้นตอนที่เหลือให้ทำตาม [Readme_appIOS.md](Readme_appIOS.md) หัวข้อ Simulator, iPhone, Release และรายการทดสอบ
 
 ## เกณฑ์ก่อนส่งผู้ทดสอบ
 

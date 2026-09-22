@@ -43,7 +43,7 @@ Parkly Admin    ── WKWebView ── /admin/    ┘
 
 ```text
 Mobile app/
-  Readme_app.md
+  Readme_appIOS.md
   VERIFICATION.md
   iOS/
     Parkly.xcodeproj/                 # เปิดใน Xcode; มี 3 shared schemes
