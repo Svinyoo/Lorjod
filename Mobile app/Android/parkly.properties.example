@@ -1,0 +1,13 @@
+# Copy to parkly.properties (ignored by Git).
+# Replace with your own unique application ID prefix before distributing.
+applicationIdPrefix=com.yourcompany.parkly
+# Empty is allowed only for Debug; configure it in the app's connection settings.
+# Release builds require a valid HTTPS origin without a path/query/credentials.
+serverUrl=https://parkly.example.com
+
+# Optional RELEASE signing. Prefer environment variables over storing passwords:
+# PARKLY_STORE_FILE, PARKLY_STORE_PASSWORD, PARKLY_KEY_ALIAS, PARKLY_KEY_PASSWORD
+# storeFile=/absolute/path/to/your-release-key.jks
+# storePassword=
+# keyAlias=
+# keyPassword=

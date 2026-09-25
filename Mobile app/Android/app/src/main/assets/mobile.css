@@ -1,0 +1,17 @@
+/* Loaded only by the Android apps; the desktop website keeps its existing styles. */
+html { -webkit-text-size-adjust: 100%; }
+input, select, textarea { font-size: 16px !important; }
+button, .auth-link { min-height: 44px; }
+textarea { max-width: 100%; }
+dialog { max-width: calc(100vw - 24px); max-height: 85dvh; overflow: auto; }
+@media (max-width: 600px) {
+  .page-heading, .section-heading, .topbar { flex-wrap: wrap; }
+  .actions { flex-wrap: wrap; }
+  .sidebar nav { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+/* Cross-role links belong in the matching installed app. The native navigation
+   policy also checks routes; API authorization still happens on the server. */
+html[data-parkly-app="renter"] .auth-link[href^="/landlord"],
+html[data-parkly-app="renter"] .auth-link[href^="/admin"],
+html[data-parkly-app="landlord"] .auth-link[href="/login.html"],
+html[data-parkly-app="admin"] .auth-link[href="/login.html"] { display: none; }

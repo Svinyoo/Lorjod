@@ -1,5 +1,7 @@
 # Parkly — ระบบจองที่จอดรถ
 
+แอพ Android แยกสามบทบาทอยู่ใน `Mobile app/Android` อ่านการตั้งค่า สร้าง APK ติดตั้งและเข้าใช้งานที่ [Readme_appAndoird.md](Readme_appAndoird.md) ส่วนคู่มือ iOS เปลี่ยนชื่อเป็น [Readme_appIOS.md บน branch IOS-App](https://github.com/Svinyoo/Lorjod/blob/IOS-App/Readme_appIOS.md)
+
 เว็บแอปสำหรับผู้จองที่ล็อกอินแล้ว: ค้นหาลานจอด, เลือกเวลา/รถ, เห็นราคาและช่องว่างแบบเรียลไทม์, ยืนยันการจอง และรับ Digital Pass พร้อม QR-style code
 
 ## เริ่มต้น

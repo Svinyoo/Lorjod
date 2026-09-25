@@ -1,0 +1,107 @@
+plugins {
+    id 'com.android.application'
+}
+
+def local = new Properties()
+def localFile = rootProject.file('parkly.properties')
+if (localFile.exists()) localFile.withInputStream { local.load(it) }
+def setting = { String env, String key -> System.getenv(env) ?: local.getProperty(key, '') }
+def prefix = setting('PARKLY_APPLICATION_ID_PREFIX', 'applicationIdPrefix') ?: 'com.example.parkly'
+def server = setting('PARKLY_SERVER_URL', 'serverUrl').trim()
+def quoted = { String value -> groovy.json.JsonOutput.toJson(value) }
+if (!(prefix ==~ /[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+/)) {
+    throw new GradleException('Use a lowercase reverse-domain applicationIdPrefix, for example com.yourcompany.parkly')
+}
+def signingValues = [
+    storeFile: setting('PARKLY_STORE_FILE', 'storeFile'),
+    storePassword: setting('PARKLY_STORE_PASSWORD', 'storePassword'),
+    keyAlias: setting('PARKLY_KEY_ALIAS', 'keyAlias'),
+    keyPassword: setting('PARKLY_KEY_PASSWORD', 'keyPassword')
+]
+def hasSigning = signingValues.values().every { !it.isEmpty() }
+
+android {
+    namespace 'com.parkly.mobile'
+    compileSdk 36
+    defaultConfig {
+        applicationId prefix
+        minSdk 26
+        targetSdk 36
+        versionCode 1
+        versionName '0.1.0'
+        buildConfigField 'String', 'SERVER_URL', quoted(server)
+    }
+    buildFeatures { buildConfig true }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    signingConfigs {
+        release {
+            if (hasSigning) {
+                storeFile rootProject.file(signingValues.storeFile)
+                storePassword signingValues.storePassword
+                keyAlias signingValues.keyAlias
+                keyPassword signingValues.keyPassword
+            }
+        }
+    }
+    buildTypes {
+        debug { applicationIdSuffix '.debug' }
+        release {
+            minifyEnabled false
+            if (hasSigning) signingConfig signingConfigs.release
+        }
+    }
+    flavorDimensions += 'role'
+    productFlavors {
+        renter {
+            dimension 'role'
+            applicationIdSuffix '.renter'
+            buildConfigField 'String', 'ROLE', '"renter"'
+            resValue 'string', 'app_name', 'Parkly Renter'
+            resValue 'color', 'brand_color', '#126D4F'
+            manifestPlaceholders = [appIcon: '@drawable/ic_renter']
+        }
+        landlord {
+            dimension 'role'
+            applicationIdSuffix '.landlord'
+            buildConfigField 'String', 'ROLE', '"landlord"'
+            resValue 'string', 'app_name', 'Parkly Landlord'
+            resValue 'color', 'brand_color', '#173F35'
+            manifestPlaceholders = [appIcon: '@drawable/ic_landlord']
+        }
+        admin {
+            dimension 'role'
+            applicationIdSuffix '.admin'
+            buildConfigField 'String', 'ROLE', '"admin"'
+            resValue 'string', 'app_name', 'Parkly Admin'
+            resValue 'color', 'brand_color', '#213857'
+            manifestPlaceholders = [appIcon: '@drawable/ic_admin']
+        }
+    }
+}
+
+// Prevent accidentally shipping a configurable or insecure development endpoint.
+def validateRelease = tasks.register('validateReleaseConfiguration') {
+    doLast {
+        URI uri
+        try { uri = new URI(server) } catch (Exception ignored) {
+            throw new GradleException('Release requires a valid HTTPS serverUrl in parkly.properties or PARKLY_SERVER_URL')
+        }
+        if (uri.scheme != 'https' || !uri.host || uri.rawUserInfo != null || uri.rawQuery != null ||
+            uri.rawFragment != null || !(uri.rawPath in ['', '/']) || uri.port == 0 || uri.port > 65535) {
+            throw new GradleException('Release serverUrl must be an HTTPS origin only, without credentials, path, query or fragment')
+        }
+        if (signingValues.values().any { !it.isEmpty() } && !hasSigning) {
+            throw new GradleException('Provide all four release signing values, or leave all empty for an unsigned build')
+        }
+    }
+}
+tasks.configureEach {
+    if (name ==~ /pre(Renter|Landlord|Admin)ReleaseBuild/) dependsOn validateRelease
+}
+
+dependencies {
+    testImplementation 'junit:junit:4.13.2'
+}
