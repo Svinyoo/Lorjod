@@ -14,7 +14,7 @@ async function start() {
   const adminDb = await openDatabase();
   const app = express();
   // Opt in only when HTTPS terminates at a reverse proxy on this same host.
-  // This lets production secure session cookies work in the iOS web views.
+  // This lets production secure session cookies work in mobile web views.
   if (process.env.TRUST_LOCAL_PROXY === "1") app.set("trust proxy", "loopback");
   app.use(express.json());
   app.use(session({

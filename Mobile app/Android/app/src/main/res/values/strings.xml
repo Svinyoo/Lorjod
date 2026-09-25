@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="back">ย้อนกลับ</string>
+    <string name="home">หน้าแรก</string>
+    <string name="settings">การเชื่อมต่อ</string>
+    <string name="loading">กำลังเชื่อมต่อ</string>
+    <string name="error_title">ยังเปิด Parkly ไม่ได้</string>
+    <string name="retry">เปิดหน้าแรกอีกครั้ง</string>
+    <string name="not_configured">ยังไม่ได้ตั้งค่าเซิร์ฟเวอร์ที่ใช้ได้ เปิดการเชื่อมต่อในรุ่น Debug หรือติดต่อผู้ดูแลแอพสำหรับรุ่น Release</string>
+    <string name="network_error">เชื่อมต่อไม่ได้ ตรวจอินเทอร์เน็ต, URL, Wi-Fi และว่าเซิร์ฟเวอร์เปิดอยู่ หากเพิ่งส่งการจอง ให้ตรวจรายการเดิมก่อนส่งซ้ำ</string>
+    <string name="tls_error">ใบรับรอง HTTPS ไม่ผ่านการตรวจสอบ โปรดติดต่อผู้ดูแลเซิร์ฟเวอร์ แอพจะไม่ข้ามการตรวจใบรับรอง</string>
+    <string name="role_blocked">หน้านี้อยู่นอกบทบาทของแอพ โปรดเปิดแอพ Parkly ที่ตรงกับบัญชีของคุณ</string>
+    <string name="redirect_blocked">บล็อกการเปลี่ยนไปเซิร์ฟเวอร์อื่น โปรดตรวจ URL ในการเชื่อมต่อ</string>
+    <string name="no_handler">ไม่พบแอพที่เปิดลิงก์นี้ได้</string>
+    <string name="clear_session">ล้างการเข้าสู่ระบบในเครื่องนี้</string>
+    <string name="clear_description">ล้างคุกกี้และแคชของแอพนี้ แล้วเข้าสู่ระบบใหม่ ไม่ลบบัญชีหรือข้อมูลบนเซิร์ฟเวอร์ ถ้ายังเชื่อมต่อได้ ให้กดออกจากระบบในหน้าเว็บก่อนเพื่อยกเลิก session บนเซิร์ฟเวอร์ด้วย</string>
+    <string name="connection_help">ใช้ URL จากผู้ดูแลระบบ เช่น https://parkly.example.com โดยไม่เติม /api หรือชื่อบทบาท Emulator ใช้ http://10.0.2.2:3000 เพื่อเชื่อม Mac; มือถือจริงใช้ IP ของ Mac ใน Wi-Fi เดียวกัน การเปลี่ยนเซิร์ฟเวอร์จะล้างคุกกี้และแคช ข้อมูลฟอร์มที่ยังไม่บันทึกจะหาย</string>
+    <string name="release_help">รุ่น Release ใช้ HTTPS URL ที่กำหนดตอน build หากเชื่อมต่อไม่ได้ให้ติดต่อผู้ดูแลแอพ</string>
+    <string name="save_connect">บันทึกและเชื่อมต่อ</string>
+    <string name="close">ปิด</string>
+    <string name="cancel">ยกเลิก</string>
+    <string name="ok">ตกลง</string>
+    <string name="server_url">URL เซิร์ฟเวอร์</string>
+    <string name="prototype">ต้องเชื่อมต่อเซิร์ฟเวอร์ระหว่างใช้งาน การชำระเงิน, ภาพ QR และการแจ้งเตือนยังเป็นต้นแบบของระบบเดิม</string>
+</resources>
