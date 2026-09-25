@@ -13,6 +13,9 @@ async function start() {
   // A separate connection keeps Admin transactions isolated from other requests.
   const adminDb = await openDatabase();
   const app = express();
+  // Opt in only when HTTPS terminates at a reverse proxy on this same host.
+  // This lets production secure session cookies work in the iOS web views.
+  if (process.env.TRUST_LOCAL_PROXY === "1") app.set("trust proxy", "loopback");
   app.use(express.json());
   app.use(session({
     secret: process.env.SESSION_SECRET || "change-this-demo-secret-before-production",
@@ -40,7 +43,7 @@ async function start() {
     res.status(500).json({ message: "เกิดข้อผิดพลาดในระบบ กรุณาลองใหม่" });
   });
   const port = process.env.PORT || 3000;
-  app.listen(port, () => console.log(`Open http://localhost:${port}`));
+  app.listen(port, process.env.HOST || undefined, () => console.log(`Open http://localhost:${port}`));
 }
 
 start().catch((error) => {

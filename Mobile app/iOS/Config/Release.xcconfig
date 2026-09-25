@@ -1,0 +1,7 @@
+#include "Common.xcconfig"
+INFOPLIST_FILE = Config/Release-Info.plist
+SWIFT_COMPILATION_MODE = wholemodule
+SWIFT_OPTIMIZATION_LEVEL = -O
+DEBUG_INFORMATION_FORMAT = dwarf-with-dsym
+VALIDATE_PRODUCT = YES
+#include? "Local.xcconfig"

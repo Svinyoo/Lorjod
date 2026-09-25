@@ -1,0 +1,7 @@
+iOS/build/
+iOS/DerivedData/
+*.xcuserstate
+xcuserdata/
+iOS/Config/Local.xcconfig
+*.ipa
+*.xcarchive
